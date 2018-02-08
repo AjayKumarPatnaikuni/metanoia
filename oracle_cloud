@@ -1,0 +1,53 @@
+Every Oracle Cloud Infrastructure resource has an Oracle-assigned unique ID called an Oracle Cloud Identifier (OCID). It's included as part of the resource's information in both the Console and API
+
+If you use the API, you'll need the OCID for your tenancy. You can a resource's OCID by using a "List" API operation on that resource type,
+or by viewing the resource in the Console
+----------------------------------------------------------------------------------------------------
+ocid1.<RESOURCE TYPE>.<REALM>.[REGION][.FUTURE USE].<UNIQUE ID>
+
+ocid1: The literal string indicating the version of the OCID.
+* resource type: The type of resource (for example, instance, volume, vcn, subnet, user, group, and so on).
+* realm: The realm the resource is in. A realm is a set of regions that share entities. The only possible value is oc1.
+* region: The region the resource is in (for example, phx, iad, eu-frankfurt-1). With the introduction of the Frankfurt region, the format switched from a three-character code to a longer string. This part is present in the OCID only for regional resources or those specific to a single availability domain. If the region is not applicable to the resource, this part might be blank (see the example tenancy ID below).
+* future use: Reserved for future use; currently blank
+* unique ID: The unique portion of the ID. The format may vary depending on the type of resource or service.
+
+Example OCIDs
+l tenancy: ocid1.tenancy.oc1..aaaaaaaaba3pv6wkcr4jqae5f44n2b2m2yt2j6rx32uzr4h25vqstifsfdsq
+l instance: ocid1.instance.oc1.phx.abuw4ljrlsfiqw6vzzxb43vyypt4pkodawglp3wqxjqofakrwvou52gb6s5a
+
+
+COMPUTE, STORAGE, NETWORKING, DATABASE, 
+ephemeral ips/ reserved public ips
+
+security lists // for VCN/Subnet
+
+Buckets
+
+identity cloud service-- home, users, groups, applications, jobs, settings
+
+block volume, 
+
+
+***
+compute --> compartment(permissions you have), launch instance
+OCID[oracle cloud identifier]
+availability domain
+image compartment
+image source[oracle provided image/custom image/boot volume/image ocid]
+shape type[virtual machine/bare metal machine]** VM/BM
+shape(template-no.of cpus, memory)
+
+BM.Standard/high/dence/gpu- 36/52 cpus
+VM.Standard/denceio-24 cpus
+
+
+
+---->>> opc user ?
+
+awk -v n=13 -v s=' <passthrough ipv="ipv4">-A OUTPUT -d 169.254.169.254/32 -p udp -m udp --dport 123 -m comment --comment "Allow access to OCI local NTP service" -j ACCEPT </passthrough>' 'NR == n {print s} {print}' /etc/firewalld/direct.xml > tmp && mv tmp /etc/firewalld/direct.xml
+
+custom images
+
+
+
