@@ -1,0 +1,144 @@
+192.168.3.145
+vmothe
+mss@1234
+
+
+http://192.168.3.145:8090/computer/dockernode/configure
+http://192.168.3.145:9080/manager/html
+amar/reds
+
+docker pull jenkins
+
+ docker run -dti -p 8090:8080 --name jenkins1 jenkins
+788b059b131fb5c9ed25b7910f3a0af58589153fd73f5ae5c50a253e272c8278
+
+
+docker exec jenkins1 cat /var/jenkins_home/secrets/initialAdminPassword
+docker run -dti -p 8099:8080 --name j2 jenkins /bin/bash
+docker run -dti --name jenkins-m -p 8080:8080 jenkins /bin/bash
+
+
+ docker exec jenkins1 cat /var/jenkins_home/secrets/initialAdminPassword
+1936f77a05d747f18fa59436849adc28
+
+
+ docker run -dti --name deploytom -p 8099:8080 ubuntu /bin/bash
+8ed3188b501f21fd8939ef8ad0d1f11b7d6678087bab28a08c078a8ea66e929a
+
+docker attach deploytom
+	apt-get update
+	apt-get install wget
+	wget http://redrockdigimark.com/apachemirror/tomcat/tomcat-8/v8.5.27/bin/apache-tomcat-8.5.27.tar.gz
+	tar -xzvf apache-tomcat-8.5.27.tar.gz
+	apt-get install vim
+	 vim apache-tomcat-8.5.27/conf/tomcat-users.xml
+		<role rolename="manager-gui"/>
+		<role rolename="manager-status"/>
+		<role rolename="manager-script"/>
+		<role rolename="admin"/>
+		<user username="tomcat" password="passtomcat" roles="admin,manager-gui,manager-script,manager-status"/>
+	  </tomcat-users>
+	apt-get install default-jdk default-jre
+	apache-tomcat-8.5.27/bin/startup.sh
+	apt-get install ssh
+	
+	######	
+	
+
+	
+vim /etc/default/jenkins
+
+FROM ubuntu
+RUN apt-get update -y && apt-get install -y  git ssh default-jre default-jdk vim sudo wget tar
+RUN wget http://www-eu.apache.org/dist/tomcat/tomcat-7/v7.0.84/bin/apache-tomcat-7.0.84.tar.gz
+RUN tar xvzf apache-tomcat-7.0.84.tar.gz
+COPY tomcat-users.xml apache-tomcat-7.0.84/conf/tomcat-users.xml
+RUN useradd amar
+RUN (echo reds ; echo reds) | passwd amar
+RUN sed -i "/^PermitRootLogin/c\PermitRootLogin yes" /etc/ssh/sshd_config
+RUN sed -i "s/#PasswordAuthentication yes/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+RUN echo "amar    ALL=(ALL:ALL) ALL" >> /etc/sudoers
+EXPOSE 8080
+EXPOSE 22
+ENTRYPOINT ./apache-tomcat-7.0.84/bin/startup.sh && service ssh start && bash
+
+sshpass -p'reds' ssh -p 51 amar@192.168.3.145
+
+
+https://github.com/jleetutorial/maven-project/
+
+FROM ubuntu
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y  software-properties-common && \
+    add-apt-repository ppa:webupd8team/java -y && \
+    apt-get update && \
+    echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
+    apt-get install -y oracle-java8-installer && \
+    apt-get clean
+RUN wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
+RUN echo "deb https://pkg.jenkins.io/debian-stable binary/" >> /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y jenkins
+EXPOSE 8080
+ENTRYPOINT service jenkins start && bash
+
+
+
+
+
+************************************************************************************
+************************************************************************************
+************************************************************************************
+docker --version
+
+if [ $? != 0 ] ; then echo exit ; fi
+
+# new is a folder, 
+
+# FROM ubuntu
+# 
+# RUN apt-get update && \
+# 
+#     apt-get upgrade -y && \
+# 
+#     apt-get install -y  software-properties-common && \
+# 
+#     add-apt-repository ppa:webupd8team/java -y && \
+# 
+#     apt-get update && \
+# 
+#     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
+# 
+#     apt-get install -y oracle-java8-installer && \
+# 
+#     apt-get clean
+# 
+
+
+i=`docker images | grep testingi | awk '{print $1}'`
+
+if [ $i == "testingi" ] ; then echo "using the already existed image" ; 
+else docker build -t testingi new ; fi
+
+
+c=`docker ps -a | grep testing1 | awk '{print $NF}'`
+if [ $c == "testing1" ] ; then docker rm -f testing1 ; fi
+
+docker run -dti --name testing1 testingi /bin/bash
+
+## scp **/*.jar **/*.war backup_server
+
+docker exec -it testing1 java -version
+
+
+
+************************************************************************************
+************************************************************************************
+************************************************************************************
+
+
+
+
+
+
