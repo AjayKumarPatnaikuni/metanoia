@@ -110,3 +110,125 @@ curl http://localhost:5043/v2/
 curl http://USERNAME:PASSWORD@localhost:5043/v2/ // localhost (or) yourdomain [-k ]
 
 
+
+-------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
+
+version: '3'
+services:
+ db:
+   build: db
+   volumes:
+    - db_data:/var/lib/mysql
+   container_name: sqldb
+   environment:
+     MYSQL_DATABASE: "solar"
+     MYSQL_USER: "solar"
+     MYSQL_PASSWORD: "solar"
+     MYSQL_ROOT_PASSWORD: "root"
+   ports:
+    - "3306:3306"
+   networks:
+    dbn:
+     ipv4_address: 10.5.0.11
+ app:
+   build: .
+   container_name: appsolar
+   ports:
+    - "8080:8080"
+    - "28080:28080"
+   networks:
+    dbn:
+     ipv4_address: 10.5.0.25
+   depends_on:
+    - db
+volumes:
+  db_data:
+
+networks:
+ dbn:
+  driver: bridge
+  ipam:
+   config:
+    - subnet: 10.5.0.0/16 
+
+
+
+
+FROM java:8
+VOLUME /tmp
+RUN apt-get update -y && apt-get install -y supervisor
+RUN groupadd -r app && useradd -r -gapp app
+RUN mkdir -m 0755 -p /usr/local/app/bin
+RUN mkdir -m 0755 -p /usr/local/app/config
+RUN mkdir -m 0755 -p /usr/local/app/logs/
+
+COPY solar-discovery.jar /usr/local/app/bin
+COPY solar-config.jar /usr/local/app/bin
+COPY solar-core.jar /usr/local/app/bin
+COPY solar-dashboard.jar /usr/local/app/bin
+COPY solar-maps.jar /usr/local/app/bin
+COPY solar-calendar.jar /usr/local/app/bin
+COPY solar-reports.jar /usr/local/app/bin
+
+RUN mkdir -p /home/reports && chmod 0755 /home/reports
+
+COPY app-supervisor.conf /etc/supervisor/conf.d
+
+
+EXPOSE 28080
+
+CMD ["/usr/bin/supervisord", "-n"]
+
+
+
+
+
+FROM mysql:5.7
+
+# Environment variables
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=solar
+ENV MYSQL_USER=solar
+ENV MYSQL_PASSWORD=solar
+RUN echo "lower_case_table_names=1" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+COPY Solar.sql /docker-entrypoint-initdb.d/
+
+
+
+Solar.sql /docker-entrypoint-initdb.d/
+docker-compose up
+docker exec database.dev bash /tmp/import.sh
+
+
+
+version: '3'
+services:
+ database:
+   image: mysql
+   command: mysqld --user=root --verbose
+   volumes:
+    - ./Solar.sql:/tmp/Solar.sql
+    - ./import.sh:/tmp/import.sh
+   environment:
+     MYSQL_DATABASE: "solar"
+     MYSQL_USER: "solar"
+     MYSQL_PASSWORD: "solar"
+     MYSQL_ROOT_PASSWORD: "root"
+     MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+   ports:
+    - "3306:3306"
+   deploy:
+    resources:
+     limits:
+      cpus: '0.50'
+      memory: 2G
+     reservations:
+      cpus: '0.25'
+      memory: 1G
+ app1:
+   build: .
+   ports:
+    - "8080:8080"
+   depends_on:
+    - database
